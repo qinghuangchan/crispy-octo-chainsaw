@@ -1,0 +1,197 @@
+blueprint:
+  name: Change Session of Day
+  description: "This Blueprint changes the state of a input_select depending on the time of the day."
+  domain: automation
+  input:
+    input_select_helper:
+      name: Input Select Helper
+      description: "This must be an input_select helper of the Dropdown type. The input_select must contain the following options: Wakeup, Morning, Day, Evening, Bedtime."
+      selector:
+        entity:
+          domain: input_select
+
+    wakeup:
+      name: "Wakeup time"
+      description: "Time to change the input_select to Wakeup mode!"
+      selector:
+        time:
+    morning:
+      name: "Morning time"
+      description: "Time to change the input_select to Morning mode!"
+      selector:
+        time:
+    day:
+      name: "Day time"
+      description: "Time to change the input_select to Day mode!"
+      selector:
+        time:
+    evening:
+      name: "Evening time"
+      description: "Time to change the input_select to Evening mode!"
+      selector:
+        time:
+    bedtime:
+      name: "Bedtime"
+      description: "Time to change the input_select to Bedtime mode"
+      selector:
+        time:
+
+mode: restart
+
+trigger:
+  - platform: time
+    at: !input wakeup
+  - platform: time
+    at: !input morning
+  - platform: time
+    at: !input day
+  - platform: time
+    at: !input evening
+  - platform: time
+    at: !input bedtime
+  - platform: homeassistant
+    event: start
+
+action:
+  - variables:
+      trigger_id: "{{ trigger.id }}"
+
+  - choose:
+  
+      # Wakeup
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: template
+                value_template: >
+                  {{ trigger_id == 0 }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input "input_select_helper"
+            data:
+              option: Wakeup
+              
+      # Morning
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: template
+                value_template: >
+                  {{ trigger_id == 1 }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input "input_select_helper"
+            data:
+              option: Morning
+              
+      # Day
+      - conditions:
+          condition: template
+          value_template: >
+            {{ trigger_id == 2 }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input "input_select_helper"
+            data:
+              option: Day
+
+      # Evening
+      - conditions:
+          condition: template
+          value_template: >
+            {{ trigger_id == 3 }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input "input_select_helper"
+            data:
+              option: "Evening"
+              
+      # Bedtime
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: template
+                value_template: >
+                  {{ trigger_id == 4 }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input "input_select_helper"
+            data:
+              option: Bedtime
+
+      # On Server Reboot
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: template
+                value_template: >
+                  {{ trigger_id == 5 }}
+
+        sequence:
+	  - choose:
+	  
+	      # Wakeup
+	      - conditions:
+		  - condition: time
+                    after: !input wakeup
+                    before: !input morning
+                sequence:
+		  - service: input_select.select_option
+		    target:
+		      entity_id: !input "input_select_helper"
+		    data:
+		      option: Wakeup
+
+
+	      # Morning
+	      - conditions:
+		  - condition: time
+                    after: !input morning
+                    before: !input day
+		sequence:
+		  - service: input_select.select_option
+		    target:
+		      entity_id: !input "input_select_helper"
+		    data:
+		      option: Morning
+		      
+	      # Day
+	      - conditions:
+		  - condition: time
+                    after: !input day
+                    before: !input evening
+		sequence:
+		  - service: input_select.select_option
+		    target:
+		      entity_id: !input "input_select_helper"
+		    data:
+		      option: Day
+
+	      # Evening
+	      - conditions:
+		  - condition: time
+                    after: !input evening
+                    before: !input bedtime
+		sequence:
+		  - service: input_select.select_option
+		    target:
+		      entity_id: !input "input_select_helper"
+		    data:
+		      option: "Evening"
+		      
+	      # Bedtime
+	      - conditions:
+		  - condition: time
+                    after: !input bedtime
+                    before: !input wakeup
+		sequence:
+		  - service: input_select.select_option
+		    target:
+		      entity_id: !input "input_select_helper"
+		    data:
+		      option: Bedtime
