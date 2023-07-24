@@ -1,0 +1,135 @@
+blueprint:
+  name: Change Brightness Helper based on Session of Day
+  description: "This Blueprint changes value of a input_number depending on the Session of Day."
+  domain: automation
+  input:
+    input_select_helper:
+      name: Input Select Helper
+      description: "This must be an input_select helper that holds the Session of Day value."
+      selector:
+        entity:
+          domain: input_select
+
+    input_number_helper:
+      name: Input Number Helper
+      description: "This must be an input_number helper that we want to change based on Session of Day."
+      selector:
+        entity:
+          domain: input_number
+
+    wakeup:
+      name: "Wakeup Brightness Value"
+      description: "Numerical value to set input_number to during Wakeup mode!"
+      selector:
+        number:
+          min: 0
+          max: 100
+    morning:
+      name: "Morning Brightness Value"
+      description: "Numerical value to set input_number to during Morning mode!"
+      selector:
+        number:
+          min: 0
+          max: 100
+    day:
+      name: "Day Brightness Value"
+      description: "Numerical value to set input_number to during Day mode!"
+      selector:
+        number:
+          min: 0
+          max: 100
+    evening:
+      name: "Evening Brightness Value"
+      description: "Numerical value to set input_number to during Evening mode!"
+      selector:
+        number:
+          min: 0
+          max: 100
+    bedtime:
+      name: "Bedtime Brightness Value"
+      description: "Numerical value to set input_number to during Bedtime mode"
+      selector:
+        number:
+          min: 0
+          max: 100
+
+mode: restart
+
+trigger:
+  - platform: state
+    entity_id: !input_select_helper
+  - platform: homeassistant
+    event: start
+
+action:
+  - variables:
+      trigger_id: "{{ trigger.id }}"
+
+  - choose:
+  
+      # Wakeup
+      - conditions:
+          - condition: template
+            value_template: > 
+              {{ is_state("input_select.session_of_day", "Wakeup") }}
+
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: !wakeup
+            target:
+              entity_id: !input_number_helper
+              
+      # Morning
+      - conditions:
+          - condition: template
+            value_template: > 
+              {{ is_state("input_select.session_of_day", "Morning") }}
+
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: !morning
+            target:
+              entity_id: !input_number_helper
+              
+      # Day
+      - conditions:
+          - condition: template
+            value_template: > 
+              {{ is_state("input_select.session_of_day", "Day") }}
+
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: !day
+            target:
+              entity_id: !input_number_helper
+
+      # Evening
+      - conditions:
+          - condition: template
+            value_template: > 
+              {{ is_state("input_select.session_of_day", "Evening") }}
+
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: !evening
+            target:
+              entity_id: !input_number_helper
+              
+      # Bedtime
+      - conditions:
+          - condition: template
+            value_template: > 
+              {{ is_state("input_select.session_of_day", "Bedtime") }}
+
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: !bedtime
+            target:
+              entity_id: !input_number_helper
+      
+      
