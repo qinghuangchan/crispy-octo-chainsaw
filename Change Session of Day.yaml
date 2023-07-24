@@ -133,65 +133,73 @@ action:
                   {{ trigger_id == 5 }}
 
         sequence:
-	  - choose:
-	  
-	      # Wakeup
-	      - conditions:
-		  - condition: time
+          - choose:
+          
+              # Wakeup
+              - conditions:
+                  - condition: time
                     after: !input wakeup
                     before: !input morning
                 sequence:
-		  - service: input_select.select_option
-		    target:
-		      entity_id: !input "input_select_helper"
-		    data:
-		      option: Wakeup
+                  - service: input_select.select_option
+                    target:
+                      entity_id: !input "input_select_helper"
+                    data:
+                      option: Wakeup
 
 
-	      # Morning
-	      - conditions:
-		  - condition: time
+              # Morning
+              - conditions:
+                  - condition: time
                     after: !input morning
                     before: !input day
-		sequence:
-		  - service: input_select.select_option
-		    target:
-		      entity_id: !input "input_select_helper"
-		    data:
-		      option: Morning
-		      
-	      # Day
-	      - conditions:
-		  - condition: time
+                sequence:
+                  - service: input_select.select_option
+                    target:
+                      entity_id: !input "input_select_helper"
+                    data:
+                      option: Morning
+                      
+              # Day
+              - conditions:
+                  - condition: time
                     after: !input day
                     before: !input evening
-		sequence:
-		  - service: input_select.select_option
-		    target:
-		      entity_id: !input "input_select_helper"
-		    data:
-		      option: Day
+                sequence:
+                  - service: input_select.select_option
+                    target:
+                      entity_id: !input "input_select_helper"
+                    data:
+                      option: Day
 
-	      # Evening
-	      - conditions:
-		  - condition: time
+              # Evening
+              - conditions:
+                  - condition: time
                     after: !input evening
                     before: !input bedtime
-		sequence:
-		  - service: input_select.select_option
-		    target:
-		      entity_id: !input "input_select_helper"
-		    data:
-		      option: "Evening"
-		      
-	      # Bedtime
-	      - conditions:
-		  - condition: time
+                sequence:
+                  - service: input_select.select_option
+                    target:
+                      entity_id: !input "input_select_helper"
+                    data:
+                      option: "Evening"
+                      
+              # Bedtime
+              - conditions:
+                  - condition: time
                     after: !input bedtime
                     before: !input wakeup
-		sequence:
-		  - service: input_select.select_option
-		    target:
-		      entity_id: !input "input_select_helper"
-		    data:
-		      option: Bedtime
+                sequence:
+                  - service: input_select.select_option
+                    target:
+                      entity_id: !input "input_select_helper"
+                    data:
+                      option: Bedtime
+
+      
+      
+      
+      
+      
+      
+      
