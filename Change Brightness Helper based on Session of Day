@@ -57,14 +57,11 @@ mode: restart
 
 trigger:
   - platform: state
-    entity_id: !input_select_helper
+    entity_id: !input input_select_helper
   - platform: homeassistant
     event: start
 
 action:
-  - variables:
-      trigger_id: "{{ trigger.id }}"
-
   - choose:
   
       # Wakeup
@@ -76,9 +73,9 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: !wakeup
+              value: !input wakeup
             target:
-              entity_id: !input_number_helper
+              entity_id: !input input_number_helper
               
       # Morning
       - conditions:
@@ -89,9 +86,9 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: !morning
+              value: !input morning
             target:
-              entity_id: !input_number_helper
+              entity_id: !input input_number_helper
               
       # Day
       - conditions:
@@ -102,9 +99,9 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: !day
+              value: !input day
             target:
-              entity_id: !input_number_helper
+              entity_id: !input input_number_helper
 
       # Evening
       - conditions:
@@ -115,9 +112,9 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: !evening
+              value: !input evening
             target:
-              entity_id: !input_number_helper
+              entity_id: !input input_number_helper
               
       # Bedtime
       - conditions:
@@ -128,8 +125,8 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: !bedtime
+              value: !input bedtime
             target:
-              entity_id: !input_number_helper
+              entity_id: !input input_number_helper
       
       
