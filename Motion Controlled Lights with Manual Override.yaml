@@ -1,0 +1,92 @@
+blueprint:
+  name: Motion Controlled Lights with Manual Override
+  description: "When a binary_sensor is triggered, turn on one or more lights with brightness specified by a input_number. When the binary_sensor is reset, turn off configured lights after a timeout. If configured lights are manually turned on or off during, the automation will not turn off any lights after the cooldown."
+  domain: automation
+  input:
+    binary_sensor_trigger:
+      name: Binary Sensor to Trigger On and Off
+      description: "This must be a binary_sensor. The automation turns on and off lights on the state of this sensor"
+      selector:
+        entity:
+          domain: binary_sensor
+
+    lights_list:
+      name: Lights to Trigger
+      selector:
+        entity:
+          domain: switch
+          multiple: true
+      
+    switches_list:
+      name: Switches to Trigger
+      selector:
+        entity:
+          domain: switch
+          multiple: true
+
+trigger:
+  - platform: state
+    entity_id: !input binary_sensor_trigger
+    from: "off"
+    to: "on"
+
+condition:
+  - condition: numeric_state
+    entity_id: input_number.general_lights_brightness_controller
+    above: 0
+  - condition: state
+    entity_id: light.foyer_spot_light
+    state: "off"
+action:
+
+
+
+    
+
+action:
+  - service: light.turn_on
+    data:
+      brightness_pct: "{{ states(\"input_number.general_lights_brightness_controller\") }}"
+    target:
+      entity_id:
+        - light.foyer_spot_light
+  - wait_for_trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.foyer_motion_group
+        from: "on"
+        to: "off"
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      area_id: foyer
+mode: single
+
+
+
+- wait_for_trigger:
+          - platform: time
+            at: "10:30:00"
+          - platform: event
+            event_type: mobile_app_notification_action
+            event_data:
+              action: roborock_autoclean_now
+          - platform: event
+            event_type: mobile_app_notification_action
+            event_data:
+              action: roborock_autoclean_abort
+- choose:
+    - conditions:
+        - condition: template
+          value_template: '{{ wait.trigger.event.data.action == "roborock_autoclean_now" }}'
+      sequence:
+        - service: XXX
+    - conditions:
+        - condition: template
+          value_template: '{{ wait.trigger.event.data.action == "roborock_autoclean_abort" }}'
+      sequence:
+        - service: XXX
