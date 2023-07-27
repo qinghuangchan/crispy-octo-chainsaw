@@ -84,7 +84,7 @@ action:
         from: "on"
         to: "off"
       - platform: state
-        entity_id: !input swtiches_list
+        entity_id: !input switches_list
         from: "on"
         to: "off"
       
