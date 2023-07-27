@@ -94,7 +94,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ wait.trigger.id == 0 }}"
+            value_template: "{{ wait.trigger.id == '0' }}"
         sequence:
           - service: light.turn_off
             target:
@@ -105,8 +105,8 @@ action:
 
       - conditions:
           - condition: template
-            value_template: "{{ wait.trigger.id == 1 or wait.trigger.id == 2 }}"
+            value_template: "{{ wait.trigger.id == '1' or wait.trigger.id == '2' }}"
         sequence:
-          - stop: "Automation because a light or switch was manually triggered"
+          - stop: "Automation stopped because a light or switch was manually triggered"
 
 mode: single
