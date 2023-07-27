@@ -16,14 +16,14 @@ blueprint:
       selector:
         entity:
           domain: input_number
-          
+
     lights_list:
       name: Lights to Trigger
       selector:
         entity:
-          domain: switch
+          domain: light
           multiple: true
-      
+
     switches_list:
       name: Switches to Trigger
       selector:
@@ -33,16 +33,16 @@ blueprint:
 
     lights_off_delay:
       name: Lights Off Delay
-      selector: 
+      selector:
         number:
           min: 0
           max: 86400
           mode: box
           unit_of_measurement: "seconds"
-      
-# variables: 
+
+# variables:
 #   lights_list: !input lights_list
-  
+
 trigger:
   - platform: state
     entity_id: !input binary_sensor_trigger
@@ -59,16 +59,14 @@ condition:
   - condition: state
     entity_id: !input switches_list
     state: "off"
-    
+
 action:
   - service: light.turn_on
     data:
       brightness_pct: !input lights_brightness_input_number
-    target:
-      entity_id: !input lights_list
+    target: !input lights_list
   - service: switch.turn_on
-    target:
-      entity_id: !input switches_list
+    target: !input switches_list
   - wait_for_trigger:
       - platform: state
         entity_id:
@@ -87,24 +85,20 @@ action:
         entity_id: !input switches_list
         from: "on"
         to: "off"
-      
+
   - choose:
       - conditions:
           - condition: template
-            value_template: '{{ wait.trigger.id == 0 }}'
+            value_template: "{{ wait.trigger.id == 0 }}"
         sequence:
           - service: light.turn_off
-            data:
-              brightness_pct: !input lights_brightness_input_number
-            target:
-              entity_id: !input lights_list
+            target: !input lights_list
           - service: switch.turn_off
-            target:
-              entity_id: !input switches_list
-              
+            target: !input switches_list
+
       - conditions:
           - condition: template
-            value_template: '{{ wait.trigger.id == 1 || wait.trigger.id == 2 }}'
+            value_template: "{{ wait.trigger.id == 1 || wait.trigger.id == 2 }}"
         sequence:
           - stop: "Automation because a light or switch was manually triggered"
 
