@@ -1,5 +1,5 @@
 blueprint:
-  # source_url: test.yaml
+  source_url: https://github.com/qinghuangchan/crispy-octo-chainsaw/tree/main
   name: Lights Brightness Minimum Value Enforcer
   description: When the brightness value of a configured light falls below the configured minimum value, this automation sets the brightness back to the minimum value. Useful for dimmable light bulbs which need a certain minimum value to work well.
   domain: automation
