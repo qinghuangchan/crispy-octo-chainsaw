@@ -1,0 +1,46 @@
+blueprint:
+  # source_url: test.yaml
+  name: Lights Brightness Minimum Value Enforcer
+  description: When the brightness value of a configured light falls below the configured minimum value, this automation sets the brightness back to the minimum value. Useful for dimmable light bulbs which need a certain minimum value to work well.
+  domain: automation
+  input:
+    trigger_below_value:
+      name: "Trigger Brightness Value (out of 225)"
+      description: "Automation triggers when brightness value of light falls below Trigger Brightness Value."
+      selector:
+        number:
+          min: 0
+          max: 225
+          unit_of_measurement: "of 255"
+    min_value:
+      name: "Set Minimum Brightness %"
+      description: "When triggered, brightness % of light is set to Set Minimum Brightness %."
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+    lights_list:
+      name: Lights to Trigger
+      default: []
+      selector:
+        entity:
+          domain:
+            - light
+          multiple: true
+
+variables:
+  min_value_var: !input min_value
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input lights_list
+    attribute: brightness
+    below: !input trigger_below_value
+action:
+  - service: light.turn_on
+    data:
+      brightness_pct: !input min_value
+    target:
+      entity_id: "{{ trigger.entity_id }}"
+mode: single
