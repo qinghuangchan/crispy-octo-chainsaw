@@ -10,6 +10,13 @@ blueprint:
         entity:
           domain: binary_sensor
 
+    lights_brightness_input_number:
+      name: Input Number to Control Brightness of Lights
+      description: "This must be a input_number with min 0 and max 100. The automation sets brightness of lights based on this value."
+      selector:
+        entity:
+          domain: input_number
+          
     lights_list:
       name: Lights to Trigger
       selector:
@@ -24,6 +31,18 @@ blueprint:
           domain: switch
           multiple: true
 
+    lights_off_delay:
+      name: Lights Off Delay
+      selector: 
+        number:
+          min: 0
+          max: 86400
+          mode: box
+          unit_of_measurement: "seconds"
+      
+# variables: 
+#   lights_list: !input lights_list
+  
 trigger:
   - platform: state
     entity_id: !input binary_sensor_trigger
@@ -32,61 +51,61 @@ trigger:
 
 condition:
   - condition: numeric_state
-    entity_id: input_number.general_lights_brightness_controller
+    entity_id: !input lights_brightness_input_number
     above: 0
   - condition: state
-    entity_id: light.foyer_spot_light
+    entity_id: !input lights_list
     state: "off"
-action:
-
-
-
+  - condition: state
+    entity_id: !input switches_list
+    state: "off"
     
-
 action:
   - service: light.turn_on
     data:
-      brightness_pct: "{{ states(\"input_number.general_lights_brightness_controller\") }}"
+      brightness_pct: !input lights_brightness_input_number
     target:
-      entity_id:
-        - light.foyer_spot_light
+      entity_id: !input lights_list
+  - service: switch.turn_on
+    target:
+      entity_id: !input switches_list
   - wait_for_trigger:
       - platform: state
         entity_id:
-          - binary_sensor.foyer_motion_group
+          - !input binary_sensor_trigger
         from: "on"
         to: "off"
         for:
           hours: 0
-          minutes: 5
-          seconds: 0
-  - service: light.turn_off
-    data: {}
-    target:
-      area_id: foyer
+          minutes: 0
+          seconds: !input lights_off_delay
+      - platform: state
+        entity_id: !input lights_list
+        from: "on"
+        to: "off"
+      - platform: state
+        entity_id: !input swtiches_list
+        from: "on"
+        to: "off"
+      
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: '{{ wait.trigger.id == 0 }}'
+        sequence:
+          - service: light.turn_off
+            data:
+              brightness_pct: !input lights_brightness_input_number
+            target:
+              entity_id: !input lights_list
+          - service: switch.turn_off
+            target:
+              entity_id: !input switches_list
+              
+      - conditions:
+          - condition: template
+            value_template: '{{ wait.trigger.id == 1 || wait.trigger.id == 2 }}'
+        sequence:
+          - stop: "Automation because a light or switch was manually triggered"
+
 mode: single
-
-
-
-- wait_for_trigger:
-          - platform: time
-            at: "10:30:00"
-          - platform: event
-            event_type: mobile_app_notification_action
-            event_data:
-              action: roborock_autoclean_now
-          - platform: event
-            event_type: mobile_app_notification_action
-            event_data:
-              action: roborock_autoclean_abort
-- choose:
-    - conditions:
-        - condition: template
-          value_template: '{{ wait.trigger.event.data.action == "roborock_autoclean_now" }}'
-      sequence:
-        - service: XXX
-    - conditions:
-        - condition: template
-          value_template: '{{ wait.trigger.event.data.action == "roborock_autoclean_abort" }}'
-      sequence:
-        - service: XXX
